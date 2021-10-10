@@ -37,6 +37,11 @@ export class ProductResolver {
     return await Product.find();
   }
 
+  @Query(() => Product, { nullable: true })
+  async product(@Arg("slug") slug: string) {
+    return await Product.findOne({ where: { slug } });
+  }
+
   @Mutation(() => Product)
   async addProduct(
     @Arg("data") productData: AddProductInput
@@ -48,7 +53,7 @@ export class ProductResolver {
   }
 
   @FieldResolver(() => [Order])
-  async orders (@Root() product: Product) {
-    return await product.orders
+  async orders(@Root() product: Product) {
+    return await product.orders;
   }
 }
