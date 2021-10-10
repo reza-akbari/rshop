@@ -1,0 +1,129 @@
+version: '3.8'
+
+# IMPORTANT: indent using 2 spaces, it matters to the scripts
+
+services:
+
+  api:
+    image: node:14-alpine
+    ulimits:
+      core:
+        soft: 0
+        hard: 0
+    tty: true
+    restart: unless-stopped
+    command: ['npm', 'run', 'watch']
+    working_dir: /main
+    volumes:
+      - ./api:/main
+    environment:
+      TZ: ${RT_APP_TZ}
+      EXPOSED_PORT: 3000
+    expose:
+      - '3000' #-proxy /api
+    secrets:
+      - postgres_db
+      - postgres_usr
+      - postgres_pass
+    networks:
+      - rt-network
+
+  # client:
+  #   image: node:14-alpine
+  #   ulimits:
+  #     core:
+  #       soft: 0
+  #       hard: 0
+  #   tty: true
+  #   restart: unless-stopped
+  #   command: ['npm', '--version']
+  #   working_dir: /main
+  #   volumes:
+  #     - ./client:/main
+  #   environment:
+  #     TZ: ${RT_APP_TZ}
+  #     EXPOSED_PORT: 4000
+  #   expose:
+  #     - '4000' #-proxy /
+  #   secrets:
+  #     - postgres_db
+  #     - postgres_usr
+  #     - postgres_pass
+  #   networks:
+  #     - rt-network
+
+  nginx:
+    image: nginx:1.18-alpine
+    ulimits:
+      core:
+        soft: 0
+        hard: 0
+    restart: unless-stopped
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    ports:
+      - '${RT_APP_PORT}:80'
+      - '${RT_APP_PORT_SSL}:443'
+    networks:
+      - rt-network
+
+  postgres:
+    image: postgres:13.2-alpine
+    ulimits:
+      core:
+        soft: 0
+        hard: 0
+    restart: unless-stopped
+    volumes:
+      - ./storage/postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB_FILE: /run/secrets/postgres_db
+      POSTGRES_USER_FILE: /run/secrets/postgres_usr
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_pass
+    secrets:
+      - postgres_db
+      - postgres_usr
+      - postgres_pass
+    networks:
+      - rt-network
+
+  redis:
+    image: redis:6.0.5-alpine
+    profiles: ['disabled']
+    ulimits:
+      core:
+        soft: 0
+        hard: 0
+    restart: unless-stopped
+    volumes:
+      - ./redis/data:/data
+    networks:
+      - rt-network
+
+  smtp:
+    image: namshi/smtp
+    profiles: ['disabled']
+    ulimits:
+      core:
+        soft: 0
+        hard: 0
+    restart: unless-stopped
+    expose:
+      - '25'
+    networks:
+      - rt-network
+
+
+networks:
+  rt-network:
+    driver: bridge
+
+secrets:
+  postgres_db:
+    file: ./.secrets/postgres_db
+  postgres_usr:
+    file: ./.secrets/postgres_usr
+  postgres_pass:
+    file: ./.secrets/postgres_pass
+
