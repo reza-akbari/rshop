@@ -4,7 +4,7 @@ version: '3.8'
 
 services:
 
-  api:
+  gql:
     image: node:14-alpine
     ulimits:
       core:
@@ -15,12 +15,12 @@ services:
     command: ['npm', 'run', 'watch']
     working_dir: /main
     volumes:
-      - ./api:/main
+      - ./gql:/main
     environment:
       TZ: ${RT_APP_TZ}
-      EXPOSED_PORT: 3000
+      EXPOSED_PORT: 4000
     expose:
-      - '3000' #-proxy /api
+      - '4000' #-proxy /gql
     secrets:
       - postgres_db
       - postgres_usr
@@ -28,29 +28,29 @@ services:
     networks:
       - rt-network
 
-  # client:
-  #   image: node:14-alpine
-  #   ulimits:
-  #     core:
-  #       soft: 0
-  #       hard: 0
-  #   tty: true
-  #   restart: unless-stopped
-  #   command: ['npm', '--version']
-  #   working_dir: /main
-  #   volumes:
-  #     - ./client:/main
-  #   environment:
-  #     TZ: ${RT_APP_TZ}
-  #     EXPOSED_PORT: 4000
-  #   expose:
-  #     - '4000' #-proxy /
-  #   secrets:
-  #     - postgres_db
-  #     - postgres_usr
-  #     - postgres_pass
-  #   networks:
-  #     - rt-network
+  next:
+    image: node:14-alpine
+    ulimits:
+      core:
+        soft: 0
+        hard: 0
+    tty: true
+    restart: unless-stopped
+    command: ['npm', 'run', 'dev']
+    working_dir: /main
+    volumes:
+      - ./next:/main
+    environment:
+      TZ: ${RT_APP_TZ}
+      EXPOSED_PORT: 3000
+    expose:
+      - '3000' #-proxy /
+    secrets:
+      - postgres_db
+      - postgres_usr
+      - postgres_pass
+    networks:
+      - rt-network
 
   nginx:
     image: nginx:1.18-alpine

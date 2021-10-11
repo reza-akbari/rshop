@@ -53,7 +53,7 @@ const main = async () => {
     },
   });
   await server.start();
-  server.applyMiddleware({ app, path: "/api" });
+  server.applyMiddleware({ app, path: "/gql" });
 
   app.set("trust proxy", 1);
 
