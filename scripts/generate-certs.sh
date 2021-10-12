@@ -7,9 +7,17 @@ scriptDir="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$scriptDir"
 cd ../
 
-echo "Enter domain:"
-read domain
-echo ""
+if [ -f ".env" ]; then
+  export $(cat .env | xargs)
+fi
+
+if [[ -z "${RT_APP_DOMAIN}" ]]; then
+  echo "Enter domain:"
+  read domain
+  echo ""
+else
+  domain="${RT_APP_DOMAIN}"
+fi
 
 echo "Will use 'docker-compose.yml' file to detect ssl volume"
 

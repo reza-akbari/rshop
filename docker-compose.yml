@@ -96,8 +96,6 @@ services:
         soft: 0
         hard: 0
     restart: unless-stopped
-    volumes:
-      - ./redis/data:/data
     networks:
       - rt-network
 
